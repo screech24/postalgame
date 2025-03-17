@@ -1,6 +1,6 @@
 {
   "name": "mail-messenger",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A first-person postal delivery game in a Ghibli-inspired world",
   "main": "index.js",
   "scripts": {
