@@ -2,7 +2,7 @@
 
 A first-person postal delivery game in a Ghibli-inspired world, built with React, Three.js, and PWA technologies.
 
-**Current Version:** 0.2.2
+**Current Version:** 0.2.3
 
 ## Features
 

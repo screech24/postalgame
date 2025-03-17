@@ -197,9 +197,9 @@ const Path = () => {
   }, []);
   
   // Create path points
-  const pathPoints = useMemo(() => {
+  const pathData = useMemo(() => {
     const points = [];
-    const curve = new THREE.CurvePath();
+    const curvePath = new THREE.CurvePath();
     
     // Create a winding path
     const startPoint = new THREE.Vector3(-15, 0.01, -15);
@@ -218,7 +218,7 @@ const Path = () => {
     
     // Create curves between points
     for (let i = 0; i < points.length - 1; i++) {
-      const curve = new THREE.QuadraticBezierCurve3(
+      const bezierCurve = new THREE.QuadraticBezierCurve3(
         points[i],
         new THREE.Vector3(
           (points[i].x + points[i + 1].x) / 2 + (Math.random() - 0.5) * 5,
@@ -227,10 +227,14 @@ const Path = () => {
         ),
         points[i + 1]
       );
-      curve.add(curve);
+      curvePath.add(bezierCurve);
     }
     
-    return points;
+    // Note: Currently we're just rendering a simple plane for the path
+    // In the future, this curve could be used to create a more complex path geometry
+    // using something like THREE.TubeGeometry or by extruding a shape along the path
+    
+    return { points, curvePath };
   }, []);
   
   return (
