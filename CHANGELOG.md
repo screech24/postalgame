@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-03-17
+
+### Changed
+- Updated Node.js from v18.17.0 to v22.14.0
+- Updated npm from v9.6.7 to v10.9.2
+- Updated React from v18.2.0 to v19.0.0
+- Updated React DOM from v18.2.0 to v19.0.0
+- Updated React Router DOM from v6.22.0 to v7.3.0
+- Updated Three.js from v0.160.0 to v0.174.0
+- Updated @react-three/fiber from v8.13.0 to v9.1.0
+- Updated @react-three/drei from v9.80.0 to v10.0.4
+- Updated all other dependencies to their latest versions
+
 ## [0.2.3] - 2025-03-17
 
 ### Fixed
