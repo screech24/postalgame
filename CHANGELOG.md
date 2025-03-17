@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2025-03-17
+
+### Fixed
+- Fixed "Cannot read properties of undefined (reading 'ReactCurrentOwner')" error by downgrading React from v19 to v18.2.0
+- Downgraded React Router DOM from v7.3.0 to v6.22.0 for compatibility with React 18
+
 ## [0.2.1] - 2025-03-17
 
 ### Added

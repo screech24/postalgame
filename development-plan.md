@@ -1,9 +1,9 @@
 # Mail Messenger Game - Development Plan
 
-## Current Version: 0.2.0 (Updated: 2025-03-17)
+## Current Version: 0.2.2 (Updated: 2025-03-17)
 
 ## Progress Update
-We have successfully completed the initial technical foundation and visual style implementation of the Mail Messenger game. The current version (0.2.0) includes:
+We have successfully completed the initial technical foundation and visual style implementation of the Mail Messenger game. The current version (0.2.2) includes:
 
 - ✅ Project setup with React, Three.js, and PWA capabilities
 - ✅ Basic rendering pipeline with custom shaders
@@ -15,6 +15,7 @@ We have successfully completed the initial technical foundation and visual style
 - ✅ Procedurally generated trees, houses, and terrain
 - ✅ Water effects with transmission material
 - ✅ Post-processing effects for enhanced visuals
+- ✅ Fixed React version compatibility issues
 
 The next phase will focus on implementing core gameplay mechanics, including player movement, collision detection, and the delivery system.
 
