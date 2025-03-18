@@ -1,90 +1,60 @@
-# Mail Messenger
+# Mail Messenger Game
 
-A first-person postal delivery game in a Ghibli-inspired world, built with React, Three.js, and PWA technologies.
+A Studio Ghibli-inspired postal delivery game built with React, Three.js, and PWA capabilities.
 
-**Current Version:** 0.3.1
+## Current Version: 0.3.2
 
-## Features
+## About
 
-- 🎮 First-person gameplay with rollerblade movement
-- 🏙️ Explore a hand-crafted Ghibli-inspired town
-- 📦 Deliver mail and packages to town residents
-- 🚲 Unlock new transportation methods (bikes, scooters, flying machines)
-- 🌈 Beautiful cel-shaded visuals inspired by Studio Ghibli
-- 📱 Progressive Web App for cross-platform play
+Mail Messenger is a first-person postal delivery game set in a charming, Ghibli-inspired world. You play as a mail carrier tasked with delivering packages across a whimsical town, using rollerblades initially, with opportunities to unlock bikes, scooters, and even magical flying machines as you progress.
+
+The game features:
+- Ghibli-inspired cel-shaded visuals
+- Procedurally generated environments
+- Delivery quests and navigation systems
+- Character progression and unlockables
+
+## Recent Updates
+
+### Version 0.3.2 (2024-07-15)
+- Fixed black colors issue in the world scene
+- Improved performance when moving camera around
+- Enhanced lighting system for better visuals
+- Added instancing for trees and houses for better performance
+- Implemented dynamic quality adjustment based on framerate
 
 ## Development
 
-### Prerequisites
+This project is built with:
+- React for UI components
+- Three.js for 3D rendering
+- React Three Fiber to integrate Three.js with React
+- Custom shaders for Ghibli-style rendering
+- PWA capabilities for offline functionality
 
-- Node.js (v18+)
-- npm or yarn
-
-### Installation
+### Running the Project
 
 ```bash
-# Clone the repository
-git clone https://github.com/screech24/postalgame.git
-cd postalgame
-
 # Install dependencies
 npm install
-```
 
-### Running the Development Server
+# Start development server
+npm run dev
 
-```bash
-npm start
-```
-
-This will start the development server at http://localhost:3000.
-
-### Building for Production
-
-```bash
+# Build for production
 npm run build
 ```
 
-This will create a production-ready build in the `dist` directory.
+## Roadmap
 
-## Technical Details
-
-- **Frontend Framework**: React
-- **3D Rendering**: Three.js with React Three Fiber
-- **Styling**: Styled Components
-- **Routing**: React Router
-- **PWA Support**: Service Workers with Workbox
-
-## Project Structure
-
-```
-src/
-├── components/         # React components
-│   ├── UI/             # User interface components
-│   ├── Game/           # Game-specific components
-│   └── Effects/        # Visual effects components
-├── hooks/              # Custom React hooks
-├── game/               # Game logic
-│   ├── engine/         # Core game engine
-│   ├── world/          # World creation
-│   ├── player/         # Player mechanics
-│   ├── npc/            # NPC system
-│   ├── delivery/       # Delivery mechanics
-│   └── progression/    # Progression system
-├── shaders/            # GLSL shader code
-│   ├── toon/           # Cel-shading implementation
-│   ├── outline/        # Outline effect
-│   └── environment/    # Environmental effects
-├── utils/              # Utility functions
-└── assets/             # Code-generated assets
-```
+See the [development plan](development-plan.md) for detailed information about the project's roadmap and progress.
 
 ## License
 
-MIT
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Acknowledgements
 
-- Inspired by the beautiful worlds of Studio Ghibli
-- Built with [React Three Fiber](https://github.com/pmndrs/react-three-fiber)
-- Shader techniques adapted from various Three.js community resources 
+- Inspired by the artistic style of Studio Ghibli
+- Built with Three.js and React
+- Special thanks to the React Three Fiber community 

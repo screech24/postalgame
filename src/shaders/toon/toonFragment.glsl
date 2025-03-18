@@ -23,18 +23,24 @@ void main() {
   intensity = smoothstep(intensity - softEdge, intensity + softEdge, intensity);
   
   // Add ambient light to avoid completely dark areas
-  float ambient = 0.3;
+  float ambient = 0.5;
   intensity = max(intensity, ambient);
   
-  // Apply color
-  vec3 finalColor = baseColor * intensity;
+  // Apply color with increased brightness
+  vec3 finalColor = baseColor * intensity * 1.2;
   
   // Add rim lighting for Ghibli-like effect
-  float rimAmount = 0.7;
+  float rimAmount = 0.8;
   vec3 viewDirection = normalize(-vPosition);
   float rimDot = 1.0 - max(0.0, dot(viewDirection, normal));
   float rimIntensity = smoothstep(0.5, 1.0, rimDot) * rimAmount;
   finalColor += vec3(1.0) * rimIntensity;
+  
+  // Add slight color boost to ensure color visibility
+  finalColor = mix(finalColor, baseColor, 0.15);
+  
+  // Ensure colors don't get clamped too early
+  finalColor = clamp(finalColor, vec3(0.1), vec3(1.0));
   
   gl_FragColor = vec4(finalColor, 1.0);
 } 

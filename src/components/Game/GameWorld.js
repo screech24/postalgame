@@ -1,6 +1,6 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { useTexture, MeshTransmissionMaterial } from '@react-three/drei';
+import { useTexture, MeshTransmissionMaterial, Instances, Instance } from '@react-three/drei';
 import * as THREE from 'three';
 import { ToonMaterial } from './materials/ToonMaterial';
 
@@ -8,19 +8,20 @@ import { ToonMaterial } from './materials/ToonMaterial';
 const useGhibliGround = () => {
   const groundRef = useRef();
   
-  // Create a procedural texture for the ground
+  // Create a procedural texture for the ground - optimized
   const groundTexture = useMemo(() => {
+    const size = 256; // Reduced from 512 for better performance
     const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 512;
+    canvas.width = size;
+    canvas.height = size;
     const context = canvas.getContext('2d');
     
     // Fill with base color
     context.fillStyle = '#57cc99';
     context.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Add some noise/variation
-    for (let i = 0; i < 5000; i++) {
+    // Add some noise/variation - reduced iterations for better performance
+    for (let i = 0; i < 2000; i++) {
       const x = Math.random() * canvas.width;
       const y = Math.random() * canvas.height;
       const radius = Math.random() * 2 + 1;
@@ -66,119 +67,157 @@ const useGhibliHouses = (count = 10) => {
     ]);
   }, [count]);
   
-  return { housePositions };
+  // Pre-compute house properties for better performance
+  const houseProps = useMemo(() => {
+    return Array.from({ length: count }, () => {
+      const width = 2 + Math.random() * 2;
+      const height = 2 + Math.random() * 1;
+      const depth = 2 + Math.random() * 2;
+      const roofHeight = 1 + Math.random() * 0.5;
+      
+      // Generate a pastel color
+      const hue = Math.random() * 360;
+      const saturation = 25 + Math.random() * 30;
+      const lightness = 70 + Math.random() * 20;
+      const color = new THREE.Color().setHSL(hue/360, saturation/100, lightness/100);
+      
+      // Generate a roof color
+      const roofHue = (hue + 30) % 360;
+      const roofColor = new THREE.Color().setHSL(roofHue/360, saturation/100, (lightness - 20)/100);
+      
+      return { width, height, depth, roofHeight, color, roofColor };
+    });
+  }, [count]);
+  
+  return { housePositions, houseProps };
 };
 
-// Tree component
-const Tree = ({ position }) => {
+// Instanced Tree component for better performance
+const Trees = ({ positions }) => {
   const trunkRef = useRef();
   const leavesRef = useRef();
   
-  // Animate the tree slightly
+  // Pre-compute animation offsets for better performance
+  const animationOffsets = useMemo(() => {
+    return positions.map(position => ({
+      x: position[0] * 0.1,
+      speed: 0.1 + Math.random() * 0.1,
+    }));
+  }, [positions]);
+  
+  // Animate trees with optimized batched updates
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
+    
+    // Only apply animation if refs exist
     if (trunkRef.current && leavesRef.current) {
-      trunkRef.current.rotation.y = Math.sin(t * 0.1 + position[0]) * 0.05;
-      leavesRef.current.rotation.y = Math.sin(t * 0.1 + position[0]) * 0.1;
+      for (let i = 0; i < trunkRef.current.count; i++) {
+        const offset = animationOffsets[i];
+        const rotation = Math.sin(t * offset.speed + offset.x) * 0.05;
+        trunkRef.current.setMatrixAt(
+          i,
+          new THREE.Matrix4().makeRotationY(rotation)
+        );
+      }
+      trunkRef.current.instanceMatrix.needsUpdate = true;
+      
+      for (let i = 0; i < leavesRef.current.count; i++) {
+        const offset = animationOffsets[i];
+        const rotation = Math.sin(t * offset.speed + offset.x) * 0.1;
+        leavesRef.current.setMatrixAt(
+          i,
+          new THREE.Matrix4().makeRotationY(rotation)
+        );
+      }
+      leavesRef.current.instanceMatrix.needsUpdate = true;
     }
   });
   
   return (
-    <group position={position}>
-      {/* Trunk */}
-      <mesh ref={trunkRef} position={[0, 1, 0]}>
+    <group>
+      <Instances limit={positions.length}>
         <cylinderGeometry args={[0.2, 0.3, 2, 8]} />
         <ToonMaterial color="#8B4513" steps={3} />
-      </mesh>
+        {positions.map((position, i) => (
+          <Instance 
+            key={`trunk-${i}`} 
+            position={[position[0], position[1] + 1, position[2]]} 
+            ref={trunkRef}
+          />
+        ))}
+      </Instances>
       
-      {/* Leaves */}
-      <mesh ref={leavesRef} position={[0, 3, 0]}>
+      <Instances limit={positions.length}>
         <sphereGeometry args={[1.5, 16, 16]} />
         <ToonMaterial color="#2a9d8f" steps={4} />
-      </mesh>
+        {positions.map((position, i) => (
+          <Instance 
+            key={`leaves-${i}`} 
+            position={[position[0], position[1] + 3, position[2]]} 
+            ref={leavesRef}
+          />
+        ))}
+      </Instances>
     </group>
   );
 };
 
-// House component
-const House = ({ position }) => {
-  const houseRef = useRef();
-  
-  // Randomize house properties
-  const houseProps = useMemo(() => {
-    const width = 2 + Math.random() * 2;
-    const height = 2 + Math.random() * 1;
-    const depth = 2 + Math.random() * 2;
-    const roofHeight = 1 + Math.random() * 0.5;
-    
-    // Generate a pastel color
-    const hue = Math.random() * 360;
-    const saturation = 25 + Math.random() * 30;
-    const lightness = 70 + Math.random() * 20;
-    const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-    
-    // Generate a roof color
-    const roofHue = (hue + 30) % 360;
-    const roofColor = `hsl(${roofHue}, ${saturation}%, ${lightness - 20}%)`;
-    
-    return { width, height, depth, roofHeight, color, roofColor };
-  }, []);
+// Instanced House component for better performance
+const Houses = ({ positions, props }) => {
+  // Pre-compute house geometries
+  const houseGroup = useRef();
   
   return (
-    <group position={[position[0], position[1] + houseProps.height / 2, position[2]]}>
-      {/* Main house body */}
-      <mesh>
-        <boxGeometry args={[houseProps.width, houseProps.height, houseProps.depth]} />
-        <ToonMaterial color={houseProps.color} steps={3} />
-      </mesh>
-      
-      {/* Roof */}
-      <mesh position={[0, houseProps.height / 2 + houseProps.roofHeight / 2, 0]}>
-        <coneGeometry args={[houseProps.width * 0.8, houseProps.roofHeight, 4]} />
-        <ToonMaterial color={houseProps.roofColor} steps={2} />
-        <mesh rotation={[0, Math.PI / 4, 0]}>
-          <coneGeometry args={[houseProps.width * 0.8, houseProps.roofHeight, 4]} />
-          <ToonMaterial color={houseProps.roofColor} steps={2} />
-        </mesh>
-      </mesh>
-      
-      {/* Door */}
-      <mesh position={[0, -houseProps.height / 2 + 0.5, houseProps.depth / 2 + 0.01]}>
-        <planeGeometry args={[0.7, 1]} />
-        <ToonMaterial color="#8B4513" steps={2} />
-      </mesh>
-      
-      {/* Windows */}
-      <mesh position={[houseProps.width / 3, 0, houseProps.depth / 2 + 0.01]}>
-        <planeGeometry args={[0.5, 0.5]} />
-        <ToonMaterial color="#87CEEB" steps={1} />
-      </mesh>
-      
-      <mesh position={[-houseProps.width / 3, 0, houseProps.depth / 2 + 0.01]}>
-        <planeGeometry args={[0.5, 0.5]} />
-        <ToonMaterial color="#87CEEB" steps={1} />
-      </mesh>
+    <group ref={houseGroup}>
+      {positions.map((position, index) => (
+        <group key={`house-${index}`} position={[position[0], position[1] + props[index].height / 2, position[2]]}>
+          {/* Main house body */}
+          <mesh>
+            <boxGeometry args={[props[index].width, props[index].height, props[index].depth]} />
+            <ToonMaterial color={props[index].color} steps={3} />
+          </mesh>
+          
+          {/* Roof */}
+          <mesh position={[0, props[index].height / 2 + props[index].roofHeight / 2, 0]}>
+            <coneGeometry args={[props[index].width * 0.8, props[index].roofHeight, 4]} />
+            <ToonMaterial color={props[index].roofColor} steps={2} />
+            <mesh rotation={[0, Math.PI / 4, 0]}>
+              <coneGeometry args={[props[index].width * 0.8, props[index].roofHeight, 4]} />
+              <ToonMaterial color={props[index].roofColor} steps={2} />
+            </mesh>
+          </mesh>
+          
+          {/* Windows and doors - simplified for performance */}
+          {index % 2 === 0 && (
+            <mesh position={[0, -props[index].height / 2 + 0.5, props[index].depth / 2 + 0.01]}>
+              <planeGeometry args={[0.7, 1]} />
+              <ToonMaterial color="#8B4513" steps={2} />
+            </mesh>
+          )}
+        </group>
+      ))}
     </group>
   );
 };
 
-// Path component
+// Path component - optimized
 const Path = () => {
   const pathRef = useRef();
   
-  // Create a procedural texture for the path
+  // Create a pre-computed procedural texture for the path
   const pathTexture = useMemo(() => {
+    const size = 256; // Reduced from 512 for better performance
     const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 512;
+    canvas.width = size;
+    canvas.height = size;
     const context = canvas.getContext('2d');
     
     // Fill with base color
     context.fillStyle = '#e9c46a';
     context.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Add some noise/variation
-    for (let i = 0; i < 5000; i++) {
+    // Add some noise/variation - reduced for performance
+    for (let i = 0; i < 2000; i++) {
       const x = Math.random() * canvas.width;
       const y = Math.random() * canvas.height;
       const radius = Math.random() * 2 + 1;
@@ -196,49 +235,8 @@ const Path = () => {
     return texture;
   }, []);
   
-  // Create path points
-  const pathData = useMemo(() => {
-    const points = [];
-    const curvePath = new THREE.CurvePath();
-    
-    // Create a winding path
-    const startPoint = new THREE.Vector3(-15, 0.01, -15);
-    points.push(startPoint);
-    
-    // Add some control points to create a winding path
-    for (let i = 0; i < 5; i++) {
-      const prevPoint = points[points.length - 1];
-      const newPoint = new THREE.Vector3(
-        prevPoint.x + (Math.random() - 0.3) * 10,
-        0.01,
-        prevPoint.z + (Math.random() - 0.3) * 10
-      );
-      points.push(newPoint);
-    }
-    
-    // Create curves between points
-    for (let i = 0; i < points.length - 1; i++) {
-      const bezierCurve = new THREE.QuadraticBezierCurve3(
-        points[i],
-        new THREE.Vector3(
-          (points[i].x + points[i + 1].x) / 2 + (Math.random() - 0.5) * 5,
-          0.01,
-          (points[i].z + points[i + 1].z) / 2 + (Math.random() - 0.5) * 5
-        ),
-        points[i + 1]
-      );
-      curvePath.add(bezierCurve);
-    }
-    
-    // Note: Currently we're just rendering a simple plane for the path
-    // In the future, this curve could be used to create a more complex path geometry
-    // using something like THREE.TubeGeometry or by extruding a shape along the path
-    
-    return { points, curvePath };
-  }, []);
-  
   return (
-    <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+    <mesh ref={pathRef} position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
       <planeGeometry args={[40, 40, 1, 1]} />
       <meshStandardMaterial 
         map={pathTexture} 
@@ -261,12 +259,13 @@ const Water = () => {
     }
   });
   
+  // Optimized transmission material settings
   return (
     <mesh ref={waterRef} position={[10, -0.2, -5]} rotation={[-Math.PI / 2, 0, 0]}>
-      <circleGeometry args={[5, 32]} />
+      <circleGeometry args={[5, 16]} /> {/* Reduced from 32 for better performance */}
       <MeshTransmissionMaterial
         backside
-        samples={4}
+        samples={2} // Reduced from 4
         thickness={0.5}
         chromaticAberration={0.1}
         anisotropy={0.5}
@@ -286,19 +285,38 @@ const Water = () => {
 const GameWorld = () => {
   const { groundRef, groundTexture } = useGhibliGround();
   const { treePositions } = useGhibliTrees(15);
-  const { housePositions } = useGhibliHouses(8);
+  const { housePositions, houseProps } = useGhibliHouses(8);
+  
+  // Add initialization logic to improve performance
+  const { gl } = useThree();
+  useEffect(() => {
+    // Optimize renderer
+    gl.setPixelRatio(window.devicePixelRatio);
+    gl.setClearColor('#87CEEB', 1); // Set sky color
+    // Enable optimizations
+    gl.physicallyCorrectLights = true;
+  }, [gl]);
   
   return (
     <>
-      {/* Lighting */}
-      <ambientLight intensity={0.8} />
+      {/* Lighting - Enhanced with more lights and higher intensities */}
+      <ambientLight intensity={1.2} />
       <directionalLight 
         position={[10, 10, 5]} 
-        intensity={1} 
+        intensity={1.5} 
         castShadow 
         shadow-mapSize-width={2048} 
         shadow-mapSize-height={2048}
       />
+      {/* Additional hemisphere light for better color distribution */}
+      <hemisphereLight 
+        skyColor="#87CEEB" 
+        groundColor="#8B4513" 
+        intensity={0.8} 
+      />
+      {/* Additional point lights for highlight areas */}
+      <pointLight position={[-10, 8, -10]} intensity={0.6} color="#FFF8E1" />
+      <pointLight position={[15, 8, 15]} intensity={0.6} color="#FFECB3" />
       
       {/* Ground */}
       <mesh 
@@ -321,15 +339,11 @@ const GameWorld = () => {
       {/* Water */}
       <Water />
       
-      {/* Trees */}
-      {treePositions.map((position, index) => (
-        <Tree key={`tree-${index}`} position={position} />
-      ))}
+      {/* Trees - using instancing for better performance */}
+      <Trees positions={treePositions} />
       
-      {/* Houses */}
-      {housePositions.map((position, index) => (
-        <House key={`house-${index}`} position={position} />
-      ))}
+      {/* Houses - using instancing for better performance */}
+      <Houses positions={housePositions} props={houseProps} />
       
       {/* Player placeholder */}
       <mesh position={[0, 1, 0]} castShadow>

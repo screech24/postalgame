@@ -33,11 +33,18 @@ export const ToonMaterial = ({ color = '#ffffff', steps = 4, ...props }) => {
     return color;
   }, [color]);
   
+  // Create light direction dynamically to ensure proper lighting
+  const lightDir = useMemo(() => {
+    return new THREE.Vector3(0.5, 1, 0.8).normalize();
+  }, []);
+  
   return (
     <toonShaderMaterial 
       baseColor={threeColor} 
       steps={steps} 
-      lightDirection={[0.5, 1, 0.8]} 
+      lightDirection={lightDir}
+      transparent={true}
+      side={THREE.DoubleSide}
       {...props} 
     />
   );
