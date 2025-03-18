@@ -2,7 +2,7 @@
 
 A Studio Ghibli-inspired postal delivery game built with React, Three.js, and PWA capabilities.
 
-## Current Version: 0.3.2
+## Current Version: 0.3.3
 
 ## About
 
@@ -15,6 +15,11 @@ The game features:
 - Character progression and unlockables
 
 ## Recent Updates
+
+### Version 0.3.3 (2024-07-15)
+- Fixed critical runtime error when loading the game
+- Improved instanced rendering implementation for trees
+- Enhanced animation system stability
 
 ### Version 0.3.2 (2024-07-15)
 - Fixed black colors issue in the world scene

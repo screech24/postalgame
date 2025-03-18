@@ -94,7 +94,8 @@ const useGhibliHouses = (count = 10) => {
 
 // Instanced Tree component for better performance
 const Trees = ({ positions }) => {
-  const trunkRef = useRef();
+  // Move refs to the Instances components, not the individual instances
+  const trunksRef = useRef();
   const leavesRef = useRef();
   
   // Pre-compute animation offsets for better performance
@@ -109,53 +110,60 @@ const Trees = ({ positions }) => {
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
     
-    // Only apply animation if refs exist
-    if (trunkRef.current && leavesRef.current) {
-      for (let i = 0; i < trunkRef.current.count; i++) {
+    // Safely access the instances and update matrices
+    if (trunksRef.current && trunksRef.current.instanceMatrix) {
+      positions.forEach((position, i) => {
         const offset = animationOffsets[i];
         const rotation = Math.sin(t * offset.speed + offset.x) * 0.05;
-        trunkRef.current.setMatrixAt(
-          i,
-          new THREE.Matrix4().makeRotationY(rotation)
-        );
-      }
-      trunkRef.current.instanceMatrix.needsUpdate = true;
+        
+        // Create transform matrix
+        const matrix = new THREE.Matrix4();
+        matrix.makeRotationY(rotation);
+        matrix.setPosition(position[0], position[1] + 1, position[2]);
+        
+        // Set the matrix for this instance
+        trunksRef.current.setMatrixAt(i, matrix);
+      });
       
-      for (let i = 0; i < leavesRef.current.count; i++) {
+      // Mark as needing update
+      trunksRef.current.instanceMatrix.needsUpdate = true;
+    }
+    
+    if (leavesRef.current && leavesRef.current.instanceMatrix) {
+      positions.forEach((position, i) => {
         const offset = animationOffsets[i];
         const rotation = Math.sin(t * offset.speed + offset.x) * 0.1;
-        leavesRef.current.setMatrixAt(
-          i,
-          new THREE.Matrix4().makeRotationY(rotation)
-        );
-      }
+        
+        // Create transform matrix
+        const matrix = new THREE.Matrix4();
+        matrix.makeRotationY(rotation);
+        matrix.setPosition(position[0], position[1] + 3, position[2]);
+        
+        // Set the matrix for this instance
+        leavesRef.current.setMatrixAt(i, matrix);
+      });
+      
+      // Mark as needing update
       leavesRef.current.instanceMatrix.needsUpdate = true;
     }
   });
   
   return (
     <group>
-      <Instances limit={positions.length}>
+      {/* Apply ref to the Instances component, not to the individual instances */}
+      <Instances ref={trunksRef} limit={positions.length}>
         <cylinderGeometry args={[0.2, 0.3, 2, 8]} />
         <ToonMaterial color="#8B4513" steps={3} />
         {positions.map((position, i) => (
-          <Instance 
-            key={`trunk-${i}`} 
-            position={[position[0], position[1] + 1, position[2]]} 
-            ref={trunkRef}
-          />
+          <Instance key={`trunk-${i}`} />
         ))}
       </Instances>
       
-      <Instances limit={positions.length}>
+      <Instances ref={leavesRef} limit={positions.length}>
         <sphereGeometry args={[1.5, 16, 16]} />
         <ToonMaterial color="#2a9d8f" steps={4} />
         {positions.map((position, i) => (
-          <Instance 
-            key={`leaves-${i}`} 
-            position={[position[0], position[1] + 3, position[2]]} 
-            ref={leavesRef}
-          />
+          <Instance key={`leaves-${i}`} />
         ))}
       </Instances>
     </group>
@@ -164,11 +172,11 @@ const Trees = ({ positions }) => {
 
 // Instanced House component for better performance
 const Houses = ({ positions, props }) => {
-  // Pre-compute house geometries
-  const houseGroup = useRef();
+  // Use refs for house components if needed
+  const housesRef = useRef();
   
   return (
-    <group ref={houseGroup}>
+    <group>
       {positions.map((position, index) => (
         <group key={`house-${index}`} position={[position[0], position[1] + props[index].height / 2, position[2]]}>
           {/* Main house body */}
