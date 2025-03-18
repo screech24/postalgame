@@ -2,7 +2,7 @@
 
 A Studio Ghibli-inspired postal delivery game built with React, Three.js, and PWA capabilities.
 
-## Current Version: 0.3.3
+## Current Version: 0.4.0
 
 ## About
 
@@ -10,11 +10,20 @@ Mail Messenger is a first-person postal delivery game set in a charming, Ghibli-
 
 The game features:
 - Ghibli-inspired cel-shaded visuals
-- Procedurally generated environments
+- Procedurally generated environments with varying terrain
+- District-based world organization (residential, commercial, rural, park)
+- Path network system for natural roads and connections
 - Delivery quests and navigation systems
 - Character progression and unlockables
 
 ## Recent Updates
+
+### Version 0.4.0 (2024-07-16)
+- Implemented advanced terrain with hills, valleys, and plateaus
+- Added path network system for meaningful roads connecting key locations
+- Introduced district system for distinct areas with unique characteristics
+- Enhanced environment with multiple tree types, rocks, plants, and decorations
+- Optimized rendering with distance-based culling for better performance
 
 ### Version 0.3.3 (2024-07-15)
 - Fixed critical runtime error when loading the game

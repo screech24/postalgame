@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2024-07-16
+
+### Added
+- Implemented advanced terrain generation with height variation using noise functions
+- Created a path network system for meaningful roads and paths connecting locations
+- Added district management system for organizing the world into distinct areas
+- Enhanced environmental diversity with multiple types of trees, rocks, plants, and decorations
+- Introduced adaptive rendering based on device performance
+- Added custom messaging to loading screen
+
+### Changed
+- Replaced flat terrain with dynamic terrain featuring hills, valleys, and plateaus
+- Improved environment organization with distinct residential, commercial, park, and rural districts
+- Optimized rendering with distance-based culling for environmental elements
+- Enhanced camera settings for better world exploration
+
 ## [0.3.3] - 2024-07-15
 
 ### Fixed
